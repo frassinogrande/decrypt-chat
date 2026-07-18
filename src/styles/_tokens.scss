@@ -1,0 +1,113 @@
+:root {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    --color-bg: #ffffff;
+    --color-bg-subtle: #f9fafb;
+    --color-bg-muted: #f3f4f6;
+    --color-chat-bg: #f5f5f5;
+    --color-surface: #ffffff;
+    --color-surface-raised: #ffffff;
+
+    --color-text: #213547;
+    --color-text-muted: #6b7280;
+    --color-text-subtle: #767676;
+
+    --color-border: #e5e7eb;
+    --color-border-strong: #d1d5db;
+
+    --color-input-bg: #ffffff;
+    --color-input-border: #e1e5e9;
+    --input-radius: 8px;
+    --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%236b7280'%20d='M12,15.4,6,9.4l1.4-1.4,4.6,4.6,4.6-4.6,1.4,1.4-6,6Z'/%3E%3C/svg%3E");
+
+    --color-dialog-bg: #ffffff;
+    --color-dialog-border: #e2e8f0;
+
+    --color-accent-text: #006de2;
+
+    --color-brand-backdrop: #006de2;
+    --brand-backdrop-tile-filter: none;
+
+    --color-error-bg: #fef2f2;
+    --color-error-border: #fecaca;
+    --color-error-text: #b91c1c;
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+    --color-success-text: #15803d;
+    --color-danger-text: #dc3545;
+
+    color-scheme: light;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+[data-theme='dark'] {
+    --color-bg: #121212;
+    --color-chat-bg: #121212;
+    --color-bg-subtle: #1e1e1e;
+    --color-bg-muted: #2a2a2a;
+    --color-surface: #1e1e1e;
+    --color-surface-raised: #2a2a2a;
+    --color-text: rgba(255, 255, 255, 0.87);
+    --color-text-muted: rgba(255, 255, 255, 0.6);
+    --color-text-subtle: rgba(255, 255, 255, 0.38);
+    --color-border: #2e2e2e;
+    --color-border-strong: #3a3a3a;
+    --color-input-bg: #1e1e1e;
+    --color-input-border: #3a3a3a;
+    --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23cbd5e1'%20d='M12,15.4,6,9.4l1.4-1.4,4.6,4.6,4.6-4.6,1.4,1.4-6,6Z'/%3E%3C/svg%3E");
+    --color-dialog-bg: #1e1e1e;
+    --color-dialog-border: #2e2e2e;
+    --color-accent-text: #60a5fa;
+    --color-brand-backdrop: color-mix(in srgb, var(--color-dialog-bg) 45%, black);
+    --brand-backdrop-tile-filter: invert(1);
+    --color-text-subtle: rgba(255, 255, 255, 0.5);
+    --color-error-bg: #2d1a1a;
+    --color-error-border: #7f1d1d;
+    --color-error-text: #fca5a5;
+    --color-success-bg: #1a2d1a;
+    --color-success-border: #166534;
+    --color-success-text: #86efac;
+    --color-danger-text: #f87171;
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        --color-bg: #121212;
+        --color-chat-bg: #121212;
+        --color-bg-subtle: #1e1e1e;
+        --color-bg-muted: #2a2a2a;
+        --color-surface: #1e1e1e;
+        --color-surface-raised: #2a2a2a;
+        --color-text: rgba(255, 255, 255, 0.87);
+        --color-text-muted: rgba(255, 255, 255, 0.6);
+        --color-text-subtle: rgba(255, 255, 255, 0.5);
+        --color-border: #2e2e2e;
+        --color-border-strong: #3a3a3a;
+        --color-input-bg: #1e1e1e;
+        --color-input-border: #3a3a3a;
+        --select-arrow: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23cbd5e1'%20d='M12,15.4,6,9.4l1.4-1.4,4.6,4.6,4.6-4.6,1.4,1.4-6,6Z'/%3E%3C/svg%3E");
+        --color-dialog-bg: #1e1e1e;
+        --color-dialog-border: #2e2e2e;
+        --color-accent-text: #60a5fa;
+        --color-brand-backdrop: color-mix(in srgb, var(--color-dialog-bg) 45%, black);
+        --brand-backdrop-tile-filter: invert(1);
+        --color-error-bg: #2d1a1a;
+        --color-error-border: #7f1d1d;
+        --color-error-text: #fca5a5;
+        --color-success-bg: #1a2d1a;
+        --color-success-border: #166534;
+        --color-success-text: #86efac;
+        --color-danger-text: #f87171;
+        color-scheme: dark;
+    }
+}

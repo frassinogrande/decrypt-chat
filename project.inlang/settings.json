@@ -1,0 +1,21 @@
+{
+    "$schema": "https://inlang.com/schema/project-settings",
+    "projectId": "decrypt-chat",
+    "sourceLanguageTag": "en",
+    "languageTags": ["en", "es", "de", "fr", "it", "ru", "pt-br", "pt-pt"],
+    "modules": ["./node_modules/@inlang/plugin-message-format/dist/index.js"],
+    "plugin.inlang.messageFormat": {
+        "pathPattern": "./project.inlang/messages/{languageTag}.json"
+    },
+    "plugins": [
+        {
+            "id": "@inlang/paraglide-js",
+            "resolve": "@inlang/paraglide-js/plugin",
+            "config": {
+                "project": "./project.inlang",
+                "outdir": "./src/paraglide",
+                "importId": "$paraglide"
+            }
+        }
+    ]
+}

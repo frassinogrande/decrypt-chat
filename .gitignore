@@ -1,0 +1,82 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+build/
+dist/
+
+# SvelteKit generated files
+.svelte-kit/
+
+# Paraglide compiled output (auto-generated on build)
+src/paraglide/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.ts.timestamp-*
+
+# Logs and temp output files
+*.log
+*.exit
+logs/
+
+# SSL certificates (dev only)
+.certs/
+
+# Markdown docs (except README and the public privacy policy)
+*.md
+!README.md
+!PRIVACY_POLICY.md
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Caddy
+Caddyfile
+
+# Dev/debug console scripts
+debug-profile.js
+reset-profile.js
+
+# Ad-hoc dev/test scripts — but keep the scripts the npm lifecycle depends on
+# plus committed maintenance tools
+scripts/*
+!scripts/build-file.js
+!scripts/postbuild-fix-github-pages.js
+!scripts/generate-paraglide-types.js
+!scripts/add-icon.mjs
+
+# Syncthing
+.stfolder
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/
+.playwright/
+
+# Ad-hoc e2e test scripts (local only)
+e2e/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Security audit reports (local only)
+audits/

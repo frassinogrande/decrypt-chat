@@ -1,0 +1,154 @@
+@use 'sass:map';
+
+.btn {
+    --btn-bg: var(--color-bg-muted, #e2e8f0);
+    --btn-color: var(--color-text, #0f172a);
+    --btn-border: transparent;
+    --btn-hover-bg: #006de224;
+    --btn-hover-color: var(--btn-color);
+    --btn-hover-border: var(--btn-border);
+    --btn-disabled-bg: var(--color-bg-subtle, #cbd5f5);
+    --btn-disabled-color: var(--color-text-subtle, #94a3b8);
+    --btn-disabled-border: transparent;
+    --btn-padding: 0.65rem 1.25rem;
+    --btn-radius: 1000px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: var(--btn-padding);
+    border-radius: var(--btn-radius);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    cursor: pointer;
+    transition: all 0.4s ease;
+
+    &:disabled {
+        cursor: not-allowed;
+        background: var(--btn-disabled-bg);
+        color: var(--btn-disabled-color);
+        border-color: var(--btn-disabled-border);
+        opacity: 0.8;
+    }
+
+    &:not(:disabled):hover {
+        background: var(--btn-hover-bg);
+        color: var(--btn-hover-color);
+        border-color: var(--btn-hover-border);
+    }
+
+    &:not(:disabled):focus-visible {
+        outline: 2px solid var(--color-accent-text);
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+}
+
+$button-variants: (
+    'primary': (
+        bg: #006de2,
+        color: #ffffff,
+        border: #006de2,
+        hover-bg: #0069d9,
+        hover-color: #ffffff,
+        hover-border: #0069d9,
+        disabled-bg: #94c2ff,
+        disabled-color: rgba(255, 255, 255, 0.9),
+        disabled-border: #94c2ff,
+    ),
+    'secondary': (
+        bg: transparent,
+        color: var(--color-accent-text),
+        border: var(--color-accent-text),
+        hover-bg: rgba(0, 123, 255, 0.08),
+        hover-color: var(--color-accent-text),
+        hover-border: var(--color-accent-text),
+        disabled-bg: transparent,
+        disabled-color: rgba(0, 123, 255, 0.45),
+        disabled-border: rgba(0, 123, 255, 0.45),
+    ),
+    'white': (
+        bg: #ffffff,
+        color: #0f172a,
+        border: #ffffff,
+        hover-bg: #e2e8f0,
+        hover-color: #0f172a,
+        hover-border: #e2e8f0,
+        disabled-bg: #f1f5f9,
+        disabled-color: rgba(15, 23, 42, 0.4),
+        disabled-border: #f1f5f9,
+    ),
+    'black': (
+        bg: #0f172a,
+        color: #ffffff,
+        border: #0f172a,
+        hover-bg: #1e293b,
+        hover-color: #ffffff,
+        hover-border: #1e293b,
+        disabled-bg: #475569,
+        disabled-color: rgba(255, 255, 255, 0.75),
+        disabled-border: #475569,
+    ),
+    'black-outline': (
+        bg: transparent,
+        color: var(--color-text),
+        border: var(--color-text),
+        hover-bg: rgba(15, 23, 42, 0.08),
+        hover-color: var(--color-text),
+        hover-border: var(--color-text),
+        disabled-bg: transparent,
+        disabled-color: var(--color-text-subtle),
+        disabled-border: var(--color-text-subtle),
+    ),
+    'white-outline': (
+        bg: transparent,
+        color: #ffffff,
+        border: #ffffff,
+        hover-bg: rgba(255, 255, 255, 0.12),
+        hover-color: #ffffff,
+        hover-border: #ffffff,
+        disabled-bg: transparent,
+        disabled-color: rgba(255, 255, 255, 0.5),
+        disabled-border: rgba(255, 255, 255, 0.5),
+    ),
+    'warning': (
+        bg: #dc3545,
+        color: #ffffff,
+        border: #dc3545,
+        hover-bg: #bb2d3b,
+        hover-color: #ffffff,
+        hover-border: #bb2d3b,
+        disabled-bg: #f4a4ae,
+        disabled-color: rgba(255, 255, 255, 0.9),
+        disabled-border: #f4a4ae,
+    ),
+);
+
+@each $name, $v in $button-variants {
+    .btn--#{$name} {
+        --btn-bg: #{map.get($v, bg)};
+        --btn-color: #{map.get($v, color)};
+        --btn-border: #{map.get($v, border)};
+        --btn-hover-bg: #{map.get($v, hover-bg)};
+        --btn-hover-color: #{map.get($v, hover-color)};
+        --btn-hover-border: #{map.get($v, hover-border)};
+        --btn-disabled-bg: #{map.get($v, disabled-bg)};
+        --btn-disabled-color: #{map.get($v, disabled-color)};
+        --btn-disabled-border: #{map.get($v, disabled-border)};
+    }
+}
+
+.btn--icon:not(:disabled):hover {
+    transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    button[data-modal-close] {
+        transition: none;
+    }
+}

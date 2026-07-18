@@ -1,0 +1,53 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    min-height: 100svh;
+}
+
+ul {
+    padding-bottom: 1em;
+}
+
+p,
+li {
+    text-wrap: pretty;
+}
+
+#app {
+    display: block;
+    width: 100%;
+}
+
+.brand-backdrop {
+    position: relative;
+    isolation: isolate;
+    background: var(--color-brand-backdrop);
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background-image: url('/brand-backdrop-tile.png');
+        background-repeat: repeat;
+        background-size: 100px;
+        background-attachment: fixed;
+        opacity: 0.03;
+        filter: var(--brand-backdrop-tile-filter);
+        pointer-events: none;
+    }
+
+    > * {
+        position: relative;
+        z-index: 1;
+    }
+}

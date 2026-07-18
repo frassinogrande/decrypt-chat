@@ -1,0 +1,6 @@
+build/
+.svelte-kit/
+src/paraglide/
+scripts/
+reset-profile.js
+src/lib/utils/secure-key-manager.ts
