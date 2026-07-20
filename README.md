@@ -1,5 +1,7 @@
 # Bring your own encryption into any chat
 
+Live at **[decrypt.chat](https://decrypt.chat)**.
+
 Turn your private messages into encrypted code, then send through your favourite messaging apps, email, or SMS. The carrier only ever sees the code, only you and your contact hold the key.
 
 A fully decentralized, privacy-first chat app where only you and your recipient can ever read your messages. There is no backend: everything happens locally and client-side.
@@ -300,7 +302,9 @@ npm run build
 
 The static site is written to `build/`. A post-build step copies the SPA fallback (`404.html`) to `index.html` so the output works on GitHub Pages as-is. It deliberately does not rewrite any URLs in the built HTML, because the inline bootstrap script is covered by a CSP hash and editing it would get the script blocked.
 
-- **GitHub Pages**: publish the `build/` directory. For a _project_ site (served from `https://user.github.io/repo-name/`), set the base path at build time: `BASE_PATH=/repo-name npm run build`. This is the only supported way to deploy under a subpath.
+- **GitHub Pages**: publish the `build/` directory. For a _project_ site (served from `https://user.github.io/repo-name/`), set the base path at build time: `BASE_PATH=/repo-name npm run build`. This is the only supported way to deploy under a subpath. Serving from a domain root, as `decrypt.chat` does, needs no base path at all.
+
+  This repository deploys itself on every push to `main` via `.github/workflows/deploy.yml`, which builds without a base path and publishes to Pages. `static/CNAME` carries the custom domain into the build output.
 - **Any other static host** (Netlify, Cloudflare Pages, your own server): just serve the `build/` directory.
 
 Serve the site over HTTPS in production, since calls, clipboard features, and the service worker all require a secure context. A Content Security Policy is embedded in the pages at build time via hashed meta tags, so no server configuration is needed for it.

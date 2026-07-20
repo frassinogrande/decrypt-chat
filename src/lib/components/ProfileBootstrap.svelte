@@ -2,10 +2,12 @@
     import { get } from 'svelte/store';
     import { createEventDispatcher } from 'svelte';
     import Icon from '$lib/components/icons/Icon.svelte';
+    import { base } from '$app/paths';
     import { locale, translations as LL } from '$lib/i18n/runtime';
 
     const dispatch = createEventDispatcher();
-    const heroImage = '/landing-image.jpg';
+    // Not a plain literal: nothing rewrites strings, so a subpath deploy needs base.
+    const heroImage = `${base}/landing-image.jpg`;
 
     // Realistic-looking (but fake) examples shown in the "How it works" steps.
     const exampleShareCode = '#secure=Ah2Kp9rLmX4...Qz7w';
