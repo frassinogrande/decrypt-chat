@@ -4,16 +4,21 @@ on:
     push:
         branches: [main]
     workflow_dispatch:
+    release:
+        types: [published]
 
 permissions:
     contents: write
 
 concurrency:
-    group: single-file-build
+    group: single-file-build-${{ github.event.release.tag_name || 'main' }}
     cancel-in-progress: true
 
 jobs:
     build-and-publish:
+        # The release trigger also fires when this workflow publishes its own
+        # rolling single-file-latest release; only version tags get assets.
+        if: github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v')
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
@@ -40,7 +45,23 @@ jobs:
             # release notes reviewed before publishing). This one is fully
             # automated boilerplate, so it stays on its own tag rather than
             # touching that human-approved flow.
+            # A version release (created manually) gets the artifact built from its
+            # own tag attached next to the auto-generated source archives. The
+            # release event checks out the tag itself, so the build matches the
+            # release exactly.
+            - name: Attach to version release
+              if: github.event_name == 'release'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.event.release.tag_name }}
+              run: |
+                  cd build-singlefile
+                  gh release upload "$TAG" \
+                      decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                      --clobber
+
             - name: Publish rolling release
+              if: github.event_name != 'release'
               env:
                   GH_TOKEN: ${{ github.token }}
                   COMMIT_SHA: ${{ github.sha }}
