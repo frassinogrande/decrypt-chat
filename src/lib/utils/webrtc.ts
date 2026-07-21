@@ -377,6 +377,12 @@ export class WebRTCManager {
         );
     }
 
+    // Whether the local stream actually got a video track, as opposed to what the call's
+    // nominal type asked for. A video call falls back to audio-only when there's no camera.
+    hasLocalVideo(): boolean {
+        return !!this.localStream && this.localStream.getVideoTracks().length > 0;
+    }
+
     // ICE config for every peer connection this manager creates. In localOnly mode (the guided
     // tutorial) the STUN list is empty, so gathering is limited to host candidates and no request
     // ever leaves the device; otherwise the shared public STUN servers are used.
@@ -1042,9 +1048,12 @@ export class WebRTCManager {
 
             const constraints = {
                 audio: true,
-                video: type === 'video',
+                video: type === 'video' && (await mediaManager.hasCamera()),
             };
 
+            // A video call with no camera hardware still goes out as a video call (the peer
+            // can still send/receive video); this side just contributes no video track, same
+            // as if the camera had been muted right after connecting.
             this.localStream = await mediaManager.getUserMedia(constraints);
 
             // Fresh, dedicated peer connection for this call's media.
@@ -1085,6 +1094,10 @@ export class WebRTCManager {
     }
 
     async acceptCall(callId: string, type: 'audio' | 'video'): Promise<void> {
+        // Tracks specifically whether getUserMedia was the failing step, so the hangup we send
+        // on failure can tell the caller "couldn't answer" apart from any other accept failure,
+        // rather than lumping every failure in with a genuine decline.
+        let mediaFailed = false;
         try {
             this.activeCallId = callId;
             this.isCallMode = true;
@@ -1096,12 +1109,19 @@ export class WebRTCManager {
                 throw new Error('No incoming call connection to accept');
             }
 
+            // A video call with no camera hardware still goes out as a video call (the peer
+            // can still send/receive video); this side just contributes no video track.
             const constraints = {
                 audio: true,
-                video: type === 'video',
+                video: type === 'video' && (await mediaManager.hasCamera()),
             };
 
-            this.localStream = await mediaManager.getUserMedia(constraints);
+            try {
+                this.localStream = await mediaManager.getUserMedia(constraints);
+            } catch (mediaError) {
+                mediaFailed = true;
+                throw mediaError;
+            }
 
             this.localStream.getTracks().forEach((track) => {
                 pc.addTrack(track, this.localStream!);
@@ -1129,18 +1149,18 @@ export class WebRTCManager {
             }
         } catch (error) {
             debug.error('Failed to accept call:', error);
-            this.endCall(callId);
+            this.endCall(callId, { reason: mediaFailed ? 'media-error' : 'ended' });
             throw error;
         }
     }
 
-    async endCall(callId: string): Promise<void> {
+    async endCall(callId: string, options?: { reason?: string }): Promise<void> {
         try {
             if (this.activeCallId === callId) {
                 const callSignalData: CallSignalData = {
                     type: 'call-hangup',
                     callId: callId,
-                    data: { reason: 'ended' },
+                    data: { reason: options?.reason ?? 'ended' },
                     timestamp: Date.now(),
                 };
 

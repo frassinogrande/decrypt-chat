@@ -30,7 +30,7 @@
     import type { StoredMessage, UserProfile } from '$lib/types';
     import type { AppView } from '$lib/types/app-view';
     import { UrlFragmentProcessor, SECURE_FRAGMENT } from '$lib/services/url-fragment-processor';
-    import { tutorialController } from '$lib/services/tutorial';
+    import { tutorialController, tutorialStep } from '$lib/services/tutorial';
     import TutorialOfferDialog from '$lib/components/TutorialOfferDialog.svelte';
     import TutorialDeferredDialog from '$lib/components/TutorialDeferredDialog.svelte';
     import { dataStorage } from '$lib/utils/indexeddb-storage';
@@ -312,6 +312,20 @@
             const text = event.clipboardData?.getData('text') ?? '';
             const fragment = extractShareFragment(text);
             if (!fragment) return;
+
+            // A paste landing outside the composer (e.g. focus not back in the textarea after
+            // closing a message's "Copy code" menu) must never reach the real decrypt/connect
+            // pipeline while the tutorial chat is open, except during its own dedicated online
+            // step — there is no live peer to answer a stray code at any other point.
+            const currentChatId = $appStore.currentChatId;
+            if (
+                currentChatId &&
+                tutorialController.isTutorialChat(currentChatId) &&
+                !['await-offer-send', 'await-connect'].includes($tutorialStep)
+            ) {
+                return;
+            }
+
             event.preventDefault();
             urlFragmentProcessor.captureFromHash(fragment);
             urlFragmentProcessor
@@ -622,12 +636,16 @@
         // real send/receive pipeline, so a pasted code is never decrypted or imported. The stand-in
         // just replies as scripted. The one genuine exchange is the live "Go online" WebRTC
         // handshake: the offer is answered by the local stand-in, and the answer really connects.
+        // Gated on the tutorial actually being at that step, not just on the pasted content's
+        // prefix, so a stray webrtc-looking code pasted at any other step (e.g. a leftover
+        // clipboard value from a real chat) can't reach the real, doomed-to-fail connect path.
         if (tutorialController.isTutorialChat(chatId)) {
-            if (incomingFragment?.startsWith('#webrtc-offer=')) {
+            const atOnlineStep = ['await-offer-send', 'await-connect'].includes($tutorialStep);
+            if (atOnlineStep && incomingFragment?.startsWith('#webrtc-offer=')) {
                 await tutorialController.notifyOfferSent(chatId);
                 return;
             }
-            if (incomingFragment?.startsWith('#webrtc-answer=')) {
+            if (atOnlineStep && incomingFragment?.startsWith('#webrtc-answer=')) {
                 urlFragmentProcessor.captureFromHash(incomingFragment);
                 await urlFragmentProcessor.processPending();
                 return;

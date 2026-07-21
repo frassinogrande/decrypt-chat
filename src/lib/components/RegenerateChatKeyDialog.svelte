@@ -4,6 +4,7 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import { generateMnemonic, validateMnemonic } from '../utils/crypto';
     import { chatStorage } from '../utils/chat-storage';
+    import { copyToClipboard as copyTextToClipboard } from '../utils/web-share';
     import { translations as LL } from '$lib/i18n/runtime';
 
     export let chatId: string;
@@ -42,10 +43,10 @@
     }
 
     async function copyToClipboard(text: string) {
-        try {
-            await navigator.clipboard.writeText(text);
+        const ok = await copyTextToClipboard(text);
+        if (ok) {
             dispatch('show-toast', { message: get(LL).chatSetupCopySuccess(), type: 'success' });
-        } catch {
+        } else {
             dispatch('show-toast', { message: get(LL).chatSetupCopyError(), type: 'error' });
         }
     }

@@ -98,15 +98,31 @@ export async function shareUrl(url: string, title?: string, text?: string): Prom
  * on a focused document, so an app cannot reliably clear it again afterwards.
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
-    if (!navigator.clipboard || !navigator.clipboard.writeText) {
-        return false;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (error) {
+            debug.warn('navigator.clipboard.writeText failed, trying execCommand:', error);
+        }
     }
 
+    // Chromium rejects the async clipboard API outright on file:// (NotAllowedError:
+    // permission denied), which the single-file offline build runs under. The legacy
+    // execCommand path still honors the triggering user gesture there.
+    const helper = document.createElement('textarea');
     try {
-        await navigator.clipboard.writeText(text);
-        return true;
+        helper.value = text;
+        helper.setAttribute('readonly', '');
+        helper.style.position = 'fixed';
+        helper.style.opacity = '0';
+        document.body.appendChild(helper);
+        helper.select();
+        return document.execCommand('copy');
     } catch (error) {
         debug.error('Failed to copy to clipboard:', error);
         return false;
+    } finally {
+        helper.remove();
     }
 }

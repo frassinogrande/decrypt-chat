@@ -103,7 +103,7 @@ export class MediaManager {
                 message: (error as any)?.message,
                 constraint: (error as any)?.constraint,
             });
-            throw this.createUserFriendlyError(error);
+            throw await this.createUserFriendlyError(error, constraints);
         }
     }
 
@@ -172,7 +172,7 @@ export class MediaManager {
             } catch (restoreError) {
                 debug.error('Failed to restore camera after switch failure:', restoreError);
             }
-            throw this.createUserFriendlyError(error);
+            throw await this.createUserFriendlyError(error, { audio: false, video: true });
         }
     }
 
@@ -258,6 +258,18 @@ export class MediaManager {
         }
     }
 
+    // Whether this device has a camera at all, independent of permission state. Used to decide
+    // whether a video call should still request video, or fall back to audio-only up front.
+    async hasCamera(): Promise<boolean> {
+        try {
+            await this.enumerateDevices();
+        } catch {
+            // Enumeration failed; let getUserMedia's own constraints decide instead of guessing.
+            return true;
+        }
+        return this.videoDevices.length > 0;
+    }
+
     getAudioDevices(): MediaDevice[] {
         return [...this.audioDevices];
     }
@@ -309,12 +321,45 @@ export class MediaManager {
         });
     }
 
-    private createUserFriendlyError(error: any): Error {
+    private async createUserFriendlyError(
+        error: any,
+        requested?: { audio?: boolean | object; video?: boolean | object }
+    ): Promise<Error> {
         if (error.name === 'NotAllowedError') {
+            // Chrome auto-denies camera and microphone for file:// pages without ever
+            // prompting, and no setting can grant it. "You denied access" would be wrong
+            // and unfixable advice there; name the real cause and the ways out instead.
+            if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
+                return new Error(
+                    'This browser blocks camera and microphone access for pages opened straight from a file. To make calls, open this file in Firefox or use the hosted app.'
+                );
+            }
             return new Error(
                 'Camera and microphone access was denied. Please allow access and try again.'
             );
         } else if (error.name === 'NotFoundError') {
+            // getUserMedia({audio: true, video: true}) throws the same NotFoundError whether
+            // audio, video, or both are physically missing, so name the actual missing device
+            // rather than always blaming both — a machine with a mic but no camera otherwise
+            // gets told its microphone is missing too, which it isn't.
+            const wantsAudio = !!requested?.audio;
+            const wantsVideo = !!requested?.video;
+            let missingAudio = wantsAudio;
+            let missingVideo = wantsVideo;
+            try {
+                const devices = await this.enumerateDevices();
+                missingAudio = wantsAudio && !devices.some((d) => d.kind === 'audioinput');
+                missingVideo = wantsVideo && !devices.some((d) => d.kind === 'videoinput');
+            } catch {
+                // Enumeration failed too; fall back to blaming whatever was requested.
+            }
+            if (missingVideo && !missingAudio) {
+                // A voice call is still possible here: video is the only thing missing.
+                return new Error('No camera found. Connect one, or start a voice call instead.');
+            }
+            if (missingAudio && !missingVideo) {
+                return new Error('No microphone found. Please connect one and try again.');
+            }
             return new Error(
                 'No camera or microphone found. Please connect a device and try again.'
             );

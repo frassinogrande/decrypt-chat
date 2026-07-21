@@ -33,7 +33,7 @@ export interface StoredMessage {
     callEvent?: CallEventInfo;
 }
 
-export type CallEventOutcome = 'missed' | 'declined' | 'cancelled' | 'completed';
+export type CallEventOutcome = 'missed' | 'declined' | 'cancelled' | 'completed' | 'failed';
 
 export interface CallEventInfo {
     direction: 'incoming' | 'outgoing'; // relative to the local user; incoming = the peer called us
@@ -132,6 +132,10 @@ export interface CallParticipant {
     stream?: MediaStream;
     isAudioMuted?: boolean;
     isVideoMuted?: boolean;
+    // True when this participant's device has no camera at all, as opposed to having merely
+    // muted one. Only meaningful for 'self': it drives disabling the camera toggle rather than
+    // just showing it engaged.
+    cameraUnavailable?: boolean;
 }
 
 export interface Call {

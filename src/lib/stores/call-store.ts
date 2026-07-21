@@ -36,7 +36,10 @@ class CallStore {
         callService.setCallUpdateCallback((call: Call) => {
             if (call.state === 'incoming') {
                 incomingCall.set(call);
-            } else if (call.state === 'ended') {
+            } else if (call.state === 'ended' || call.state === 'failed') {
+                // Both are terminal. Landing 'failed' in the else branch below instead would
+                // park a dead call in activeCall forever, which ChatHeader reads as "call in
+                // progress" and disables the chat's call/connect buttons until reload.
                 const currentActive = get(activeCall);
                 const currentIncoming = get(incomingCall);
 
@@ -87,6 +90,13 @@ class CallStore {
             }
         } catch (error) {
             debug.error('Failed to accept call:', error);
+            // Without this, a failed accept (e.g. no camera/mic to answer with) left the
+            // incoming-call screen pinned to a call that CallService had already torn down —
+            // "failed" on screen, but the ringing UI never went away.
+            const incoming = get(incomingCall);
+            if (incoming && incoming.id === callId) {
+                incomingCall.set(null);
+            }
             throw error;
         }
     }
@@ -148,6 +158,10 @@ class CallStore {
         }
 
         return result;
+    }
+
+    markCameraUnavailable(callId: string): void {
+        callService.markSelfCameraUnavailable(callId);
     }
 
     updateSettings(newSettings: Partial<CallSettings>): void {

@@ -1,12 +1,12 @@
 {
     "name": "decrypt-chat",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "private": true,
     "scripts": {
         "prepare": "svelte-kit sync",
         "build": "vite build",
         "postbuild": "node scripts/postbuild-fix-github-pages.js",
-        "build:file": "vite build && node scripts/build-file.js",
+        "build:single": "npm run build && node scripts/build-singlefile.js",
         "dev": "vite dev",
         "preview": "vite preview",
         "generate:types": "node scripts/generate-paraglide-types.js",
@@ -28,6 +28,7 @@
         "eslint": "^8.56.0",
         "eslint-config-prettier": "^9.0.0",
         "eslint-plugin-svelte": "^2.36.0",
+        "esbuild": "^0.21.5",
         "prettier": "^3.1.1",
         "prettier-plugin-svelte": "^3.1.2",
         "sass": "^1.101.0",

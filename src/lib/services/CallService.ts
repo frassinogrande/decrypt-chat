@@ -132,6 +132,9 @@ export class CallService {
             if (manager) {
                 debug.log('CallService: Calling WebRTC manager acceptCall for chat:', call.chatId);
                 await manager.acceptCall(callId, call.type);
+                if (call.type === 'video' && !manager.hasLocalVideo()) {
+                    this.markSelfCameraUnavailable(callId);
+                }
             } else {
                 debug.warn(
                     'CallService: No WebRTC manager found for call acceptance, chat:',
@@ -140,6 +143,13 @@ export class CallService {
             }
         } catch (error) {
             debug.error('CallService: Failed to accept call via WebRTC manager:', error);
+            // The WebRTC manager already tore down its own peer connection/stream and told the
+            // caller via a tagged hangup signal. Without this, the call stayed in activeCalls
+            // forever with the incoming-call UI still pinned to it — nothing else ever moves it
+            // to a terminal state on this failure path.
+            this.recordCallEvent(call, 'failed');
+            this.updateCallState(callId, 'failed');
+            this.activeCalls.delete(callId);
             throw error;
         } finally {
             this.acceptingCalls.delete(callId);
@@ -268,6 +278,10 @@ export class CallService {
         }
 
         const selfParticipant = call.participants.find((p) => p.id === 'self');
+        // No camera to turn on: nothing to toggle, unlike a track that exists but is muted.
+        if (selfParticipant?.cameraUnavailable) {
+            return false;
+        }
         if (selfParticipant) {
             const newMutedState = !selfParticipant.isVideoMuted;
             selfParticipant.isVideoMuted = newMutedState;
@@ -280,6 +294,21 @@ export class CallService {
         }
 
         return false;
+    }
+
+    // Marks the local side as having no camera at all, distinct from having merely muted an
+    // existing video track. Called once a call has actually gone out or been accepted, when a
+    // video call ended up requesting audio-only because there was no camera to capture.
+    markSelfCameraUnavailable(callId: string): void {
+        const call = this.activeCalls.get(callId);
+        if (!call) return;
+
+        const selfParticipant = call.participants.find((p) => p.id === 'self');
+        if (selfParticipant) {
+            selfParticipant.isVideoMuted = true;
+            selfParticipant.cameraUnavailable = true;
+            this.notifyCallUpdate(call);
+        }
     }
 
     async handleCallSignal(callData: CallSignalData): Promise<void> {
@@ -319,10 +348,13 @@ export class CallService {
             case 'call-hangup':
                 debug.log('CallService: Call hangup received, ending call');
                 // A hangup before the call connected means it was never answered: if we were
-                // calling out, the peer declined; if they were calling us, we missed it. A hangup
-                // on a connected call is a normal end, recorded with how long it lasted.
+                // calling out, the peer declined (or, tagged 'media-error', couldn't answer at
+                // all — no camera/mic to accept with); if they were calling us, we missed it. A
+                // hangup on a connected call is a normal end, recorded with how long it lasted.
                 // This runs before the state flips to 'ended' below, which every branch needs.
-                if (call.state === 'outgoing') {
+                if (call.state === 'outgoing' && callData.data?.reason === 'media-error') {
+                    this.recordCallEvent(call, 'failed');
+                } else if (call.state === 'outgoing') {
                     this.recordCallEvent(call, 'declined');
                 } else if (call.state === 'incoming') {
                     this.recordCallEvent(call, 'missed');

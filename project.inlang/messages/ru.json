@@ -160,6 +160,8 @@
     "settingsMenuAboutIntro": "Приватный мессенджер с открытым исходным кодом, без серверов и без аккаунтов. Твои сообщения шифруются из конца в конец ключом, который есть только у тебя и твоего контакта; ничего не хранится в облаке, и никто другой не может прочитать твои беседы.",
     "settingsMenuAboutSelfHost": "Чтобы запустить собственный экземпляр, смотри ",
     "settingsMenuAboutSelfHostLink": "инструкции по установке на GitHub",
+    "settingsMenuAboutOfflineFile": "Приложение можно также скачать как ",
+    "settingsMenuAboutOfflineFileLink": "единый офлайн-файл",
     "settingsMenuAboutAllVersions": "Смотреть все версии",
     "settingsMenuAboutLinkGithub": "Смотреть на Github",
     "settingsMenuAboutLinkPrivacy": "Политика конфиденциальности",

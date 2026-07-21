@@ -160,6 +160,8 @@
     "settingsMenuAboutIntro": "Une messagerie privée et open source, sans serveurs et sans comptes. Tes messages sont chiffrés de bout en bout avec une clé que seuls toi et ton contact détenez ; rien n'est stocké dans le cloud, et personne d'autre ne peut lire tes conversations.",
     "settingsMenuAboutSelfHost": "Pour héberger ta propre instance, consulte les ",
     "settingsMenuAboutSelfHostLink": "instructions de configuration sur GitHub",
+    "settingsMenuAboutOfflineFile": "Tu peux aussi télécharger l'application sous forme de ",
+    "settingsMenuAboutOfflineFileLink": "fichier unique hors ligne",
     "settingsMenuAboutAllVersions": "Voir toutes les versions",
     "settingsMenuAboutLinkGithub": "Voir sur Github",
     "settingsMenuAboutLinkPrivacy": "Politique de confidentialité",

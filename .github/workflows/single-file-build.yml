@@ -1,0 +1,76 @@
+name: Publish single-file build
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+concurrency:
+    group: single-file-build
+    cancel-in-progress: true
+
+jobs:
+    build-and-publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - run: npm ci
+
+            - name: Build single-file artifact
+              run: npm run build:single
+
+            - name: Prepare release assets
+              run: |
+                  cd build-singlefile
+                  cp index.html decrypt-chat-single-file.html
+                  sha256sum decrypt-chat-single-file.html > decrypt-chat-single-file.html.sha256
+                  cat decrypt-chat-single-file.html.sha256
+
+            # A rolling pre-release tracking the tip of main, separate from the
+            # project's tagged version releases (which are created manually, with
+            # release notes reviewed before publishing). This one is fully
+            # automated boilerplate, so it stays on its own tag rather than
+            # touching that human-approved flow.
+            - name: Publish rolling release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  COMMIT_SHA: ${{ github.sha }}
+              run: |
+                  cd build-singlefile
+                  HASH=$(cut -d ' ' -f1 decrypt-chat-single-file.html.sha256)
+                  SHORT_SHA=$(echo "$COMMIT_SHA" | cut -c1-7)
+                  TITLE="Single-file build (main @ $SHORT_SHA)"
+                  NOTES="Automatically rebuilt from commit $COMMIT_SHA on every push to main.
+
+                  A single self-contained HTML file: no server, no network access at
+                  runtime, no service worker. Download it, verify the hash below, and
+                  open it directly in a browser — it works from file:// with no local
+                  server needed.
+
+                  SHA-256: $HASH
+
+                  Verify after downloading:
+                      sha256sum decrypt-chat-single-file.html
+
+                  This is a rolling build tracking the tip of main, separate from
+                  tagged version releases."
+
+                  if gh release view single-file-latest >/dev/null 2>&1; then
+                      gh release upload single-file-latest \
+                          decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                          --clobber
+                      gh release edit single-file-latest --title "$TITLE" --notes "$NOTES"
+                  else
+                      gh release create single-file-latest \
+                          decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                          --title "$TITLE" --notes "$NOTES" --prerelease --target main
+                  fi

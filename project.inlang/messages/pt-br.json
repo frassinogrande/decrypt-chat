@@ -160,6 +160,8 @@
     "settingsMenuAboutIntro": "Um mensageiro privado e de código aberto, sem servidores e sem contas. Suas mensagens são criptografadas de ponta a ponta com uma chave que só você e seu contato possuem; nada é armazenado na nuvem, e ninguém mais pode ler suas conversas.",
     "settingsMenuAboutSelfHost": "Para rodar sua própria instância, veja as ",
     "settingsMenuAboutSelfHostLink": "instruções de configuração no GitHub",
+    "settingsMenuAboutOfflineFile": "Você também pode baixar o app como um ",
+    "settingsMenuAboutOfflineFileLink": "arquivo único offline",
     "settingsMenuAboutAllVersions": "Ver todas as versões",
     "settingsMenuAboutLinkGithub": "Ver no GitHub",
     "settingsMenuAboutLinkPrivacy": "Política de Privacidade",

@@ -10,6 +10,7 @@
     export let isVideoCall: boolean = false;
     export let isFullscreen: boolean = false;
     export let hasMultipleCameras: boolean = false;
+    export let cameraUnavailable: boolean = false;
 
     const dispatch = createEventDispatcher();
 
@@ -59,9 +60,18 @@
                 type="button"
                 class="btn btn--secondary btn--icon call-control"
                 class:is-engaged={isVideoMuted}
+                disabled={cameraUnavailable}
                 on:click={handleMuteVideo}
-                title={isVideoMuted ? $LL.callControlsCameraOn() : $LL.callControlsCameraOff()}
-                aria-label={isVideoMuted ? $LL.callControlsCameraOn() : $LL.callControlsCameraOff()}
+                title={cameraUnavailable
+                    ? $LL.callControlsNoCamera()
+                    : isVideoMuted
+                      ? $LL.callControlsCameraOn()
+                      : $LL.callControlsCameraOff()}
+                aria-label={cameraUnavailable
+                    ? $LL.callControlsNoCamera()
+                    : isVideoMuted
+                      ? $LL.callControlsCameraOn()
+                      : $LL.callControlsCameraOff()}
             >
                 {#if isVideoMuted}
                     <Icon name="videocam-disabled" size={24} className="call-control-icon" />
@@ -163,6 +173,13 @@
         --btn-hover-bg: rgba(255, 255, 255, 0.22);
         --btn-hover-color: #ffffff;
         --btn-hover-border: transparent;
+    }
+
+    /* No camera at all, as opposed to one merely switched off: still shows the disabled-camera
+       icon, but dimmed and non-interactive rather than an actionable toggle. */
+    .btn--secondary.call-control:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     /* Engaged state (mic muted, camera off, fullscreen): solid so it reads as active. */

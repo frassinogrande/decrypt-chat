@@ -160,6 +160,8 @@
     "settingsMenuAboutIntro": "Un messenger privato e open source, senza server e senza account. I tuoi messaggi sono criptati end-to-end con una chiave che possedete solo tu e il tuo contatto; nulla viene memorizzato nel cloud e nessun altro può leggere le tue conversazioni.",
     "settingsMenuAboutSelfHost": "Per eseguire la tua istanza, consulta le ",
     "settingsMenuAboutSelfHostLink": "istruzioni di configurazione su GitHub",
+    "settingsMenuAboutOfflineFile": "Puoi anche scaricare l'app come ",
+    "settingsMenuAboutOfflineFileLink": "file unico offline",
     "settingsMenuAboutAllVersions": "Vedi tutte le versioni",
     "settingsMenuAboutLinkGithub": "Vedi su Github",
     "settingsMenuAboutLinkPrivacy": "Informativa sulla privacy",

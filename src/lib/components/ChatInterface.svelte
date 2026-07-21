@@ -1081,7 +1081,10 @@
             await callStore.acceptCall(callId);
         } catch (error) {
             debug.error('Failed to accept call:', error);
-            alert(get(LL).chatInterfaceErrorAcceptCall());
+            // Surface the real cause (e.g. no camera/mic on this device) rather than a generic
+            // message that leaves the user guessing why the call just disappeared.
+            const message = error instanceof Error ? error.message : '';
+            alert(message || get(LL).chatInterfaceErrorAcceptCall());
         }
     }
 

@@ -168,6 +168,8 @@ declare module '$paraglide/messages' {
     export const settingsMenuAboutIntro: () => string;
     export const settingsMenuAboutSelfHost: () => string;
     export const settingsMenuAboutSelfHostLink: () => string;
+    export const settingsMenuAboutOfflineFile: () => string;
+    export const settingsMenuAboutOfflineFileLink: () => string;
     export const settingsMenuAboutAllVersions: () => string;
     export const settingsMenuAboutLinkGithub: () => string;
     export const settingsMenuAboutLinkPrivacy: () => string;
@@ -462,6 +464,8 @@ declare module '$paraglide/messages' {
     export const callEventYouDeclined: () => string;
     export const callEventDeclined: () => string;
     export const callEventCancelled: () => string;
+    export const callEventYouFailed: () => string;
+    export const callEventFailed: () => string;
     export const callEventVideoLasted: (args: { duration: string | number }) => string;
     export const callEventVoiceLasted: (args: { duration: string | number }) => string;
     export const tutorialContactName: () => string;
@@ -630,6 +634,7 @@ declare module '$paraglide/messages' {
     export const callControlsAria: () => string;
     export const callControlsCameraOff: () => string;
     export const callControlsCameraOn: () => string;
+    export const callControlsNoCamera: () => string;
     export const callControlsEndCall: () => string;
     export const callControlsEnterFullscreen: () => string;
     export const callControlsExitFullscreen: () => string;

@@ -32,6 +32,11 @@
                 target="_blank"
                 rel="noopener noreferrer">{$LL.settingsMenuAboutSelfHostLink()}</a
             >.
+            {$LL.settingsMenuAboutOfflineFile()}<a
+                href="https://github.com/frassinogrande/decrypt-chat/releases/tag/single-file-latest"
+                target="_blank"
+                rel="noopener noreferrer">{$LL.settingsMenuAboutOfflineFileLink()}</a
+            >.
         </p>
         <hr class="about-divider" />
         <ul>

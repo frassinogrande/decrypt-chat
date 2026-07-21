@@ -3,6 +3,7 @@ node_modules/
 
 # Build outputs
 build/
+build-singlefile/
 dist/
 
 # SvelteKit generated files
@@ -46,7 +47,7 @@ reset-profile.js
 # Ad-hoc dev/test scripts — but keep the scripts the npm lifecycle depends on
 # plus committed maintenance tools
 scripts/*
-!scripts/build-file.js
+!scripts/build-singlefile.js
 !scripts/postbuild-fix-github-pages.js
 !scripts/generate-paraglide-types.js
 !scripts/add-icon.mjs

@@ -12,8 +12,11 @@
     const profileSettings = profileManager.settings;
     $: use24HourTime = $profileSettings.use24HourTime;
 
-    // Declined and missed read as failures; cancelled and completed are neutral.
-    $: isFailure = callEvent.outcome === 'declined' || callEvent.outcome === 'missed';
+    // Declined, missed and failed read as failures; cancelled and completed are neutral.
+    $: isFailure =
+        callEvent.outcome === 'declined' ||
+        callEvent.outcome === 'missed' ||
+        callEvent.outcome === 'failed';
 
     // A completed call names its own type ("Video call lasted ..."), so the sr-only call-type
     // suffix below would repeat it.

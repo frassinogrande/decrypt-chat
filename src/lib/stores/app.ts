@@ -1238,6 +1238,9 @@ function createAppStore() {
                 // (e.g. to a call invitation) on connection errors.
                 try {
                     await manager.startCall(call.id, type);
+                    if (type === 'video' && !manager.hasLocalVideo()) {
+                        callStore.markCameraUnavailable(call.id);
+                    }
                 } catch (error) {
                     // Silent teardown: the call never rang, so don't log a "cancelled" event.
                     await callStore.endCall(call.id, { silent: true });

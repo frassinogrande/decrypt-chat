@@ -53,6 +53,7 @@
     $: isConnected = call.state === 'connected';
     $: isAudioMuted = selfParticipant?.isAudioMuted || false;
     $: isVideoMuted = selfParticipant?.isVideoMuted || false;
+    $: cameraUnavailable = selfParticipant?.cameraUnavailable || false;
     $: peerAudioMuted = peerParticipant?.isAudioMuted || false;
     $: peerVideoMuted = peerParticipant?.isVideoMuted || false;
     $: peerName = peerParticipant?.name || $LL.callParticipantUnknown();
@@ -686,6 +687,7 @@
             {isVideoCall}
             {isFullscreen}
             {hasMultipleCameras}
+            {cameraUnavailable}
             on:mute-audio={handleMuteAudio}
             on:mute-video={handleMuteVideo}
             on:end-call={handleEndCall}

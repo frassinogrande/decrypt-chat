@@ -705,7 +705,12 @@ export class ProfileManager {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && (key.startsWith('decrypt-chat') || key.startsWith('profile-'))) {
+                    if (
+                        key &&
+                        (key.startsWith('decrypt-chat') ||
+                            key.startsWith('profile-') ||
+                            key.startsWith('tutorial-'))
+                    ) {
                         keysToRemove.push(key);
                     }
                 }

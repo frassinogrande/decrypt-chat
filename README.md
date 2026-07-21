@@ -311,11 +311,23 @@ Serve the site over HTTPS in production, since calls, clipboard features, and th
 
 Preview a production build locally with `npm run preview`.
 
-#### Offline `file://` build
+#### Single-file offline build
 
-`npm run build:file` produces a variant that opens directly from disk with no server, by rewriting asset URLs to relative paths and stripping the CSP meta tag (browsers block module loading under the `file://` scheme otherwise).
+```bash
+npm run build:single
+```
 
-**Never serve the output of `build:file` over HTTP or HTTPS.** It has no Content Security Policy, so it loses the protection the normal build relies on. Use `npm run build` for anything reachable over a network, and treat `build:file` purely as a local, single-machine convenience.
+Runs the normal build, then post-processes it into one self-contained `build-singlefile/index.html`: every script, stylesheet, font, image, and the icon sprite is inlined, and the KDF worker is handed over as a blob URL instead of a separate file. The result opens directly from disk (`file://`) with no server, no service worker, and no network access at runtime, in both Chromium and Firefox.
+
+This is handy for keeping an offline copy that works without a connection, and it has a nice side benefit: since it's a single downloaded file, you can check it against a known checksum and keep using that exact copy for as long as you like. Every push to `main` rebuilds it and publishes it as a GitHub release asset (tag `single-file-latest`) alongside a SHA-256 checksum: see `.github/workflows/single-file-build.yml`.
+
+**Don't serve the output of `build:single` over HTTP or HTTPS.** It skips the Content Security Policy the normal build ships with, so it's meant for local, offline use only. Use `npm run build` for anything reachable over a network.
+
+Three things worth knowing before relying on it:
+
+- Every `file://` page on a machine shares one storage origin, so this build's local data isn't isolated from other local HTML files the way `https://decrypt.chat`'s origin isolates it.
+- The checksum-verification benefit only covers a conversation fully if both people are using a verified copy, since the conversation key is shared between them.
+- Voice and video calls don't work in Chromium-based browsers from this build: Chrome denies camera and microphone access to `file://` pages outright, with no prompt and no setting to allow it. Messaging is unaffected. Firefox asks for permission normally, so calls work there.
 
 ---
 
