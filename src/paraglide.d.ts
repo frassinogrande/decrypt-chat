@@ -462,6 +462,8 @@ declare module '$paraglide/messages' {
     export const callEventYouDeclined: () => string;
     export const callEventDeclined: () => string;
     export const callEventCancelled: () => string;
+    export const callEventYouFailed: () => string;
+    export const callEventFailed: () => string;
     export const callEventVideoLasted: (args: { duration: string | number }) => string;
     export const callEventVoiceLasted: (args: { duration: string | number }) => string;
     export const tutorialContactName: () => string;

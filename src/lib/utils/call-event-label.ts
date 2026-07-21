@@ -11,6 +11,8 @@ interface CallEventMessages {
     callEventYouDeclined: () => string;
     callEventDeclined: () => string;
     callEventCancelled: () => string;
+    callEventYouFailed: () => string;
+    callEventFailed: () => string;
     callEventVideoLasted: (args: { duration: string }) => string;
     callEventVoiceLasted: (args: { duration: string }) => string;
 }
@@ -68,7 +70,11 @@ export function callEventLabel(
     }
 
     if (event.direction === 'incoming') {
-        return event.outcome === 'declined' ? ll.callEventYouDeclined() : ll.callEventMissed();
+        if (event.outcome === 'declined') return ll.callEventYouDeclined();
+        if (event.outcome === 'failed') return ll.callEventYouFailed();
+        return ll.callEventMissed();
     }
-    return event.outcome === 'declined' ? ll.callEventDeclined() : ll.callEventCancelled();
+    if (event.outcome === 'declined') return ll.callEventDeclined();
+    if (event.outcome === 'failed') return ll.callEventFailed();
+    return ll.callEventCancelled();
 }

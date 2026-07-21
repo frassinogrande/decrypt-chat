@@ -87,6 +87,13 @@ class CallStore {
             }
         } catch (error) {
             debug.error('Failed to accept call:', error);
+            // Without this, a failed accept (e.g. no camera/mic to answer with) left the
+            // incoming-call screen pinned to a call that CallService had already torn down —
+            // "failed" on screen, but the ringing UI never went away.
+            const incoming = get(incomingCall);
+            if (incoming && incoming.id === callId) {
+                incomingCall.set(null);
+            }
             throw error;
         }
     }

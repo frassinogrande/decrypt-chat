@@ -140,6 +140,13 @@ export class CallService {
             }
         } catch (error) {
             debug.error('CallService: Failed to accept call via WebRTC manager:', error);
+            // The WebRTC manager already tore down its own peer connection/stream and told the
+            // caller via a tagged hangup signal. Without this, the call stayed in activeCalls
+            // forever with the incoming-call UI still pinned to it — nothing else ever moves it
+            // to a terminal state on this failure path.
+            this.recordCallEvent(call, 'failed');
+            this.updateCallState(callId, 'failed');
+            this.activeCalls.delete(callId);
             throw error;
         } finally {
             this.acceptingCalls.delete(callId);
@@ -319,10 +326,13 @@ export class CallService {
             case 'call-hangup':
                 debug.log('CallService: Call hangup received, ending call');
                 // A hangup before the call connected means it was never answered: if we were
-                // calling out, the peer declined; if they were calling us, we missed it. A hangup
-                // on a connected call is a normal end, recorded with how long it lasted.
+                // calling out, the peer declined (or, tagged 'media-error', couldn't answer at
+                // all — no camera/mic to accept with); if they were calling us, we missed it. A
+                // hangup on a connected call is a normal end, recorded with how long it lasted.
                 // This runs before the state flips to 'ended' below, which every branch needs.
-                if (call.state === 'outgoing') {
+                if (call.state === 'outgoing' && callData.data?.reason === 'media-error') {
+                    this.recordCallEvent(call, 'failed');
+                } else if (call.state === 'outgoing') {
                     this.recordCallEvent(call, 'declined');
                 } else if (call.state === 'incoming') {
                     this.recordCallEvent(call, 'missed');

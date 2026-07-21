@@ -443,6 +443,8 @@
     "callEventYouDeclined": "You declined the call",
     "callEventDeclined": "Call declined",
     "callEventCancelled": "Call cancelled",
+    "callEventYouFailed": "Couldn't take the call",
+    "callEventFailed": "Call couldn't connect",
     "callEventVideoLasted": "Video call lasted {duration}",
     "callEventVoiceLasted": "Voice call lasted {duration}",
     "tutorialContactName": "Tutorial",

@@ -1085,6 +1085,10 @@ export class WebRTCManager {
     }
 
     async acceptCall(callId: string, type: 'audio' | 'video'): Promise<void> {
+        // Tracks specifically whether getUserMedia was the failing step, so the hangup we send
+        // on failure can tell the caller "couldn't answer" apart from any other accept failure,
+        // rather than lumping every failure in with a genuine decline.
+        let mediaFailed = false;
         try {
             this.activeCallId = callId;
             this.isCallMode = true;
@@ -1101,7 +1105,12 @@ export class WebRTCManager {
                 video: type === 'video',
             };
 
-            this.localStream = await mediaManager.getUserMedia(constraints);
+            try {
+                this.localStream = await mediaManager.getUserMedia(constraints);
+            } catch (mediaError) {
+                mediaFailed = true;
+                throw mediaError;
+            }
 
             this.localStream.getTracks().forEach((track) => {
                 pc.addTrack(track, this.localStream!);
@@ -1129,18 +1138,18 @@ export class WebRTCManager {
             }
         } catch (error) {
             debug.error('Failed to accept call:', error);
-            this.endCall(callId);
+            this.endCall(callId, { reason: mediaFailed ? 'media-error' : 'ended' });
             throw error;
         }
     }
 
-    async endCall(callId: string): Promise<void> {
+    async endCall(callId: string, options?: { reason?: string }): Promise<void> {
         try {
             if (this.activeCallId === callId) {
                 const callSignalData: CallSignalData = {
                     type: 'call-hangup',
                     callId: callId,
-                    data: { reason: 'ended' },
+                    data: { reason: options?.reason ?? 'ended' },
                     timestamp: Date.now(),
                 };
 

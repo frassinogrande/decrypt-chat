@@ -33,7 +33,7 @@ export interface StoredMessage {
     callEvent?: CallEventInfo;
 }
 
-export type CallEventOutcome = 'missed' | 'declined' | 'cancelled' | 'completed';
+export type CallEventOutcome = 'missed' | 'declined' | 'cancelled' | 'completed' | 'failed';
 
 export interface CallEventInfo {
     direction: 'incoming' | 'outgoing'; // relative to the local user; incoming = the peer called us
