@@ -36,9 +36,9 @@ jobs:
             - name: Prepare release assets
               run: |
                   cd build-singlefile
-                  cp index.html decrypt-chat-single-file.html
-                  sha256sum decrypt-chat-single-file.html > decrypt-chat-single-file.html.sha256
-                  cat decrypt-chat-single-file.html.sha256
+                  cp index.html decrypt-chat.html
+                  sha256sum decrypt-chat.html > decrypt-chat.html.sha256
+                  cat decrypt-chat.html.sha256
 
             # A rolling pre-release tracking the tip of main, separate from the
             # project's tagged version releases (which are created manually, with
@@ -57,7 +57,7 @@ jobs:
               run: |
                   cd build-singlefile
                   gh release upload "$TAG" \
-                      decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                      decrypt-chat.html decrypt-chat.html.sha256 \
                       --clobber
 
             - name: Publish rolling release
@@ -67,7 +67,7 @@ jobs:
                   COMMIT_SHA: ${{ github.sha }}
               run: |
                   cd build-singlefile
-                  HASH=$(cut -d ' ' -f1 decrypt-chat-single-file.html.sha256)
+                  HASH=$(cut -d ' ' -f1 decrypt-chat.html.sha256)
                   SHORT_SHA=$(echo "$COMMIT_SHA" | cut -c1-7)
                   TITLE="Single-file build (main @ $SHORT_SHA)"
                   NOTES="Automatically rebuilt from commit $COMMIT_SHA on every push to main.
@@ -80,18 +80,18 @@ jobs:
                   SHA-256: $HASH
 
                   Verify after downloading:
-                      sha256sum decrypt-chat-single-file.html
+                      sha256sum decrypt-chat.html
 
                   This is a rolling build tracking the tip of main, separate from
                   tagged version releases."
 
                   if gh release view single-file-latest >/dev/null 2>&1; then
                       gh release upload single-file-latest \
-                          decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                          decrypt-chat.html decrypt-chat.html.sha256 \
                           --clobber
                       gh release edit single-file-latest --title "$TITLE" --notes "$NOTES"
                   else
                       gh release create single-file-latest \
-                          decrypt-chat-single-file.html decrypt-chat-single-file.html.sha256 \
+                          decrypt-chat.html decrypt-chat.html.sha256 \
                           --title "$TITLE" --notes "$NOTES" --prerelease --target main
                   fi
