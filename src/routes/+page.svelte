@@ -669,6 +669,19 @@
             return;
         }
 
+        // Safari revokes the send gesture's transient activation at the first
+        // await, so the clipboard write for the share code must start now. It
+        // gets a promise that resolves once the code exists and rejects on the
+        // paths that never produce one (online delivery, errors).
+        let resolveShareCode: (code: string) => void = () => {};
+        let discardShareCode: () => void = () => {};
+        const pendingCopy = copyToClipboard(
+            new Promise<string>((resolve, reject) => {
+                resolveShareCode = resolve;
+                discardShareCode = () => reject(new Error('nothing to copy'));
+            })
+        ).catch(() => false);
+
         try {
             const rtResult = await appStore.sendRealTimeMessage(chatId, message, senderName);
             if (rtResult.ok) {
@@ -724,13 +737,9 @@
 
                 appStore.addMessage(chatId, storedMessage);
                 appStore.markUUIDAsUsed(forcedUuid);
-                try {
-                    const copied = await copyToClipboard(shareText);
-                    if (copied) {
-                        showToast($LL.toastCopiedCodeToClipboard(), 'success');
-                    }
-                } catch {
-                    // Clipboard failures are non-blocking
+                resolveShareCode(shareText);
+                if (await pendingCopy) {
+                    showToast($LL.toastCopiedCodeToClipboard(), 'success');
                 }
                 return;
             }
@@ -760,17 +769,15 @@
             };
 
             appStore.addMessage(chatId, storedMessage);
-            try {
-                const copied = await copyToClipboard(shareCode);
-                if (copied) {
-                    showToast($LL.toastCopiedCodeToClipboard(), 'success');
-                }
-            } catch {
-                // Clipboard failures are non-blocking
+            resolveShareCode(shareCode);
+            if (await pendingCopy) {
+                showToast($LL.toastCopiedCodeToClipboard(), 'success');
             }
         } catch (error) {
             debug.error('Failed to send message:', error);
             showToast($LL.pageSendMessageFailed(), 'error');
+        } finally {
+            discardShareCode();
         }
     }
 

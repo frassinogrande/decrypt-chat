@@ -295,8 +295,12 @@ class TutorialController {
         // First message: show it and run the send demo. We still encrypt it for real and drop it
         // on the clipboard so the "code on your clipboard" line holds; that is the actual lesson.
         if (step === 'await-send' && !isCode) {
+            // The copy is kicked off before any await: Safari drops the send
+            // gesture's transient activation at the first one, and the
+            // clipboard write must begin while it is still live.
+            const copied = this.copyOwnCode(chatId, message, senderName);
             await this.addOwnMessage(chatId, message, senderName, 'offline');
-            await this.copyOwnCode(chatId, message, senderName);
+            await copied;
             await this.onUserSentMessage(chatId);
             return;
         }
@@ -336,13 +340,16 @@ class TutorialController {
     }
 
     /** Encrypt the user's first message to a real share code and copy it, for the send demo. */
-    private async copyOwnCode(chatId: string, message: string, senderName: string): Promise<void> {
-        try {
-            const payload = await secureChatStorage.createSharePayload(chatId, message, senderName);
-            await copyToClipboard(buildShareCode(`#secure=${payload}`));
-        } catch (error) {
-            debug.error('Failed to prepare tutorial share code:', error);
-        }
+    private copyOwnCode(chatId: string, message: string, senderName: string): Promise<void> {
+        const code = secureChatStorage
+            .createSharePayload(chatId, message, senderName)
+            .then((payload) => buildShareCode(`#secure=${payload}`));
+        return copyToClipboard(code).then(
+            () => undefined,
+            (error) => {
+                debug.error('Failed to prepare tutorial share code:', error);
+            }
+        );
     }
 
     /** Called after the user sends a message; advances the send demo into the receive demo. */

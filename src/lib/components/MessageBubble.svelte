@@ -272,64 +272,72 @@
         return '';
     }
 
-    async function shareMessage() {
+    function shareMessage() {
         messageMenuRef?.hidePopover();
 
-        try {
-            if (typeof window === 'undefined' || !window.secureChatStorage) {
-                alert(get(LL).messageBubbleShareUnavailable());
-                return;
-            }
+        if (typeof window === 'undefined' || !window.secureChatStorage) {
+            alert(get(LL).messageBubbleShareUnavailable());
+            return;
+        }
 
-            // Determine if there is a reaction on the latest non-own message to embed (last-only)
-            let meta: any = undefined;
-            try {
-                const { dataStorage } = await import('../utils/indexeddb-storage');
-                const msgs = await dataStorage.getMessagesByChat(chatId);
-                for (let i = msgs.length - 1; i >= 0; i--) {
-                    const m: any = msgs[i];
-                    if (!m.isOwn) {
-                        if (m.reaction) {
-                            meta = { emoji: m.reaction };
-                        }
-                        break;
-                    }
-                }
-            } catch (e) {
-                // ignore meta lookup failures
-            }
+        const messageBody =
+            message.body && message.body.trim().length > 0
+                ? message.body
+                : get(LL).messageBubbleShareEmpty();
+        const overageChars = linkMessageOverageChars(messageBody);
+        if (overageChars > 0) {
+            alert(get(LL).errorMessageTooLongForLink({ count: overageChars }));
+            return;
+        }
 
-            const messageBody =
-                message.body && message.body.trim().length > 0
-                    ? message.body
-                    : get(LL).messageBubbleShareEmpty();
-            const overageChars = linkMessageOverageChars(messageBody);
-            if (overageChars > 0) {
-                alert(get(LL).errorMessageTooLongForLink({ count: overageChars }));
-                return;
-            }
-            // Reuse the original message's UUID so the regenerated code is the
-            // same identity as the message it came from. Without this a fresh
-            // UUID is minted, so pasting your own copied code back into your own
-            // chat sidesteps the "your own share code" self-paste check and gets
-            // stored as an incoming message from the other side.
-            const shareOptions: { meta?: any; forceMessageUuid?: string } = {};
-            if (meta) shareOptions.meta = meta;
-            if (message.remoteUuid) shareOptions.forceMessageUuid = message.remoteUuid;
-            const encodedPayload = await window.secureChatStorage.createSharePayload(
-                chatId,
-                messageBody,
-                message.from && message.from.trim().length > 0
-                    ? message.from
-                    : get(LL).messageBubbleShareAnonymous(),
-                Object.keys(shareOptions).length > 0 ? shareOptions : undefined
-            );
-            const shareUrl = buildShareCode(`#secure=${encodedPayload}`);
-            await copyToClipboard(shareUrl);
-        } catch (error) {
+        // The copy starts synchronously with a pending promise; Safari drops the
+        // click's transient activation at the first await, so building the code
+        // first and copying after would fail there.
+        copyToClipboard(buildShareText(window.secureChatStorage, messageBody)).catch((error) => {
             debug.error('Failed to share message:', error);
             alert(get(LL).messageBubbleShareError());
+        });
+    }
+
+    async function buildShareText(
+        storage: NonNullable<typeof window.secureChatStorage>,
+        messageBody: string
+    ): Promise<string> {
+        // Determine if there is a reaction on the latest non-own message to embed (last-only)
+        let meta: any = undefined;
+        try {
+            const { dataStorage } = await import('../utils/indexeddb-storage');
+            const msgs = await dataStorage.getMessagesByChat(chatId);
+            for (let i = msgs.length - 1; i >= 0; i--) {
+                const m: any = msgs[i];
+                if (!m.isOwn) {
+                    if (m.reaction) {
+                        meta = { emoji: m.reaction };
+                    }
+                    break;
+                }
+            }
+        } catch (e) {
+            // ignore meta lookup failures
         }
+
+        // Reuse the original message's UUID so the regenerated code is the
+        // same identity as the message it came from. Without this a fresh
+        // UUID is minted, so pasting your own copied code back into your own
+        // chat sidesteps the "your own share code" self-paste check and gets
+        // stored as an incoming message from the other side.
+        const shareOptions: { meta?: any; forceMessageUuid?: string } = {};
+        if (meta) shareOptions.meta = meta;
+        if (message.remoteUuid) shareOptions.forceMessageUuid = message.remoteUuid;
+        const encodedPayload = await storage.createSharePayload(
+            chatId,
+            messageBody,
+            message.from && message.from.trim().length > 0
+                ? message.from
+                : get(LL).messageBubbleShareAnonymous(),
+            Object.keys(shareOptions).length > 0 ? shareOptions : undefined
+        );
+        return buildShareCode(`#secure=${encodedPayload}`);
     }
 
     async function removeMessageLocally() {
