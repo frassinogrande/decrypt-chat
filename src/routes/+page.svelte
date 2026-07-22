@@ -1080,6 +1080,7 @@
     .toast .toast-close[data-modal-close] {
         width: 1.75rem;
         height: 1.75rem;
+        flex-shrink: 0;
         font-size: 1.25rem;
         margin-left: auto;
         background: rgba(255, 255, 255, 0.15);
