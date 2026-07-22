@@ -570,6 +570,7 @@ export class UrlFragmentProcessor {
                 }
             );
             const answerUrl = buildShareCode(`#webrtc-answer=${encodeURIComponent(result.answer)}`);
+            chatConnectionStore.fulfillAutoCopy(result.chatId, answerUrl);
 
             this.options.openChat(result.chatId);
             await tick();

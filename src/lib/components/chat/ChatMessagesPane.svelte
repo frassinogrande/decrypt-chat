@@ -54,6 +54,7 @@
     export let generatedAnswerUrl = '';
     export let connectionFailed = false;
     export let canRetryConnection = false;
+    export let connectionAutoCopied = false;
     export let onGenerateOffer: () => void = () => {};
     export let onDismissPanel: () => void = () => {};
     export let onRetryConnection: () => void = () => {};
@@ -444,6 +445,7 @@
         {generatedAnswerUrl}
         {connectionFailed}
         {canRetryConnection}
+        autoCopied={connectionAutoCopied}
         on:generate-offer={onGenerateOffer}
         on:dismiss={onDismissPanel}
         on:retry={onRetryConnection}

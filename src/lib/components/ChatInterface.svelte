@@ -15,6 +15,7 @@
     import { appStore } from '../stores/app';
     import { tutorialController, tutorialStep } from '../services/tutorial';
     import { chatConnectionStore } from '../stores/chat-connection-store';
+    import { copyToClipboard } from '../utils/web-share';
     import type { LazyMessageStore } from '../utils/lazy-message-store';
     import { callStore, activeCall, incomingCall } from '../stores/call-store';
     import { uiStore } from '../stores/ui-store';
@@ -739,6 +740,10 @@
             const snapshot = get(connectionStateStore);
             if (snapshot.connectionUrl) {
                 chatConnectionStore.setHasActiveOffer(chat.id, true);
+                // Reopening with an existing code: copy it within this gesture.
+                void copyToClipboard(snapshot.connectionUrl).then((ok) => {
+                    if (ok) chatConnectionStore.setAutoCopied(chat.id, true);
+                });
             } else if (!snapshot.isGeneratingOffer) {
                 try {
                     await chatConnectionStore.generateOffer(chat.id);
@@ -1167,6 +1172,7 @@
         {generatedAnswerUrl}
         {connectionFailed}
         {canRetryConnection}
+        connectionAutoCopied={connectionState.autoCopied}
         onGenerateOffer={handleGenerateOffer}
         onDismissPanel={handleDismissPanel}
         onRetryConnection={handleRetryConnection}

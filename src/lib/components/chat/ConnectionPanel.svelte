@@ -12,6 +12,10 @@
     export let connected = false;
     export let isConnecting = false;
     export let role: 'sender' | 'receiver' | null = null;
+    // True when the store's gesture-anchored auto-copy already landed the code
+    // on the clipboard (the only path that works on Safari, where the copy
+    // attempts below run outside a user gesture and fail).
+    export let autoCopied = false;
 
     const dispatch = createEventDispatcher();
 
@@ -39,10 +43,12 @@
 
     let copySuccess = false;
     let receiverWaiting = false;
-    // Whether the active code is actually on the clipboard. The auto-copy can silently
-    // fail (clipboard writes often need a user gesture / permission), so the instruction
-    // only claims "copied" once a copy has genuinely succeeded.
-    let autoCopied = false;
+    // Whether this panel's own copy attempts put the active code on the clipboard.
+    // They can silently fail (clipboard writes often need a user gesture /
+    // permission), so combined with the store's flag the instruction only claims
+    // "copied" once a copy has genuinely succeeded.
+    let selfCopied = false;
+    $: codeOnClipboard = autoCopied || selfCopied;
 
     let hasRequestedOffer = false;
     $: if (mode === 'sender' && !connectionUrl && !isGeneratingOffer && !hasRequestedOffer) {
@@ -54,7 +60,7 @@
     $: if (mode === 'sender' && connectionUrl && !hasAutoCopiedSender) {
         hasAutoCopiedSender = true;
         void copyToClipboard(connectionUrl).then((result) => {
-            autoCopied = result;
+            selfCopied = result;
         });
     }
 
@@ -62,16 +68,16 @@
     $: if (mode === 'receiver' && generatedAnswerUrl && !hasAutoCopiedReceiver) {
         hasAutoCopiedReceiver = true;
         void copyToClipboard(generatedAnswerUrl).then((result) => {
-            autoCopied = result;
+            selfCopied = result;
         });
     }
 
     $: instruction =
         mode === 'receiver'
-            ? autoCopied
+            ? codeOnClipboard
                 ? $LL.connectionPanelReceiverInstruction({ name: conversationName })
                 : $LL.connectionPanelReceiverInstructionUncopied({ name: conversationName })
-            : autoCopied
+            : codeOnClipboard
               ? $LL.connectionPanelSenderInstruction({ name: conversationName })
               : $LL.connectionPanelSenderInstructionUncopied({ name: conversationName });
 
@@ -85,7 +91,7 @@
         if (mode === 'receiver') receiverWaiting = true;
         const result = await copyToClipboard(activeCode);
         if (result) {
-            autoCopied = true;
+            selfCopied = true;
             flashCopied();
             dispatch('copy');
         }

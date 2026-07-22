@@ -11,6 +11,7 @@
     import { appStore, chatsStore } from '$lib/stores/app';
     import { encryptMessage, generateUUID } from '$lib/utils/crypto';
     import { copyToClipboard } from '$lib/utils/web-share';
+    import { chatConnectionStore } from '$lib/stores/chat-connection-store';
     import { buildShareCode } from '$lib/utils/share-link';
     import ChatSetup from '$lib/components/ChatSetup.svelte';
     import DesktopLayout from '$lib/components/DesktopLayout.svelte';
@@ -664,8 +665,15 @@
         // it. The processor trial-decrypts across chats, so it lands in the right conversation
         // regardless of which one is open.
         if (incomingFragment) {
+            // Pasting an offer produces an answer code that should land on the
+            // clipboard; the write is armed inside this send gesture because
+            // Safari drops its transient activation at the first await.
+            const answerAutoCopy = incomingFragment.startsWith('#webrtc-offer=')
+                ? chatConnectionStore.armAutoCopy()
+                : null;
             urlFragmentProcessor.captureFromHash(incomingFragment);
             await urlFragmentProcessor.processPending();
+            answerAutoCopy?.discard();
             return;
         }
 
