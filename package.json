@@ -1,6 +1,6 @@
 {
     "name": "decrypt-chat",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "private": true,
     "scripts": {
         "prepare": "svelte-kit sync",

@@ -520,20 +520,20 @@ export class UrlFragmentProcessor {
             debug.log('Failed to decrypt with any key');
             debug.error('Unable to decrypt message. Make sure you have the correct key saved.');
 
-            let errorMessage = 'Cannot decrypt message.';
+            // A code whose daily key has aged out fails GCM auth exactly like a code from a
+            // stranger, so the two are indistinguishable here. Name both rather than guessing.
+            let reason: string;
             if (chats.length === 0) {
-                errorMessage += ' No conversations found. Set up a conversation first.';
+                reason = get(LL).errorCannotDecryptNoConversations();
             } else {
                 const hasKeys = chats.some((conv) =>
                     this.options.secureKeyManager.hasConversationKey(conv.id)
                 );
-                if (!hasKeys) {
-                    errorMessage += ` ${get(LL).errorNoEncryptionKeysUnlockAccount()}`;
-                } else {
-                    errorMessage +=
-                        ' Message was encrypted with a different key. Verify you have the correct conversation key.';
-                }
+                reason = hasKeys
+                    ? get(LL).errorCannotDecryptTooOldOrWrongKey()
+                    : get(LL).errorNoEncryptionKeysUnlockAccount();
             }
+            const errorMessage = `${get(LL).errorCannotDecryptMessage()} ${reason}`;
 
             this.options.uiStore.showToast(errorMessage, 'error');
             this.incomingMessageData = null;

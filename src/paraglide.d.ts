@@ -311,6 +311,9 @@ declare module '$paraglide/messages' {
     export const toastCopiedCodeToClipboard: () => string;
     export const toastPastedOwnShareCode: (args: { name: string | number }) => string;
     export const errorNoEncryptionKeysUnlockAccount: () => string;
+    export const errorCannotDecryptMessage: () => string;
+    export const errorCannotDecryptNoConversations: () => string;
+    export const errorCannotDecryptTooOldOrWrongKey: () => string;
     export const restoreProfileErrorNoFile: () => string;
     export const restoreProfileErrorNoPassword: () => string;
     export const restoreProfileErrorGeneric: () => string;
