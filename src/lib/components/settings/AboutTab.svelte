@@ -33,7 +33,7 @@
                 rel="noopener noreferrer">{$LL.settingsMenuAboutSelfHostLink()}</a
             >.
             {$LL.settingsMenuAboutOfflineFile()}<a
-                href="https://github.com/frassinogrande/decrypt-chat/releases/tag/single-file-latest"
+                href="https://github.com/frassinogrande/decrypt-chat/releases/latest"
                 target="_blank"
                 rel="noopener noreferrer">{$LL.settingsMenuAboutOfflineFileLink()}</a
             >.
